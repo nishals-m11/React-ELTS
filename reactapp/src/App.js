@@ -1,28 +1,28 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { LoanProvider } from './context/LoanContext';
-import Navigation from './components/Navigation';
+import { Routes, Route } from 'react-router-dom';
+import { ThemeProvider } from '@mui/material/styles';
+import { CssBaseline, Box } from '@mui/material';
+import { theme } from './theme';
 import LoanList from './components/LoanList';
 import AddLoan from './components/AddLoan';
+import Navigation from './components/Navigation';
 import Footer from './components/Footer';
-import './App.css';
 
 function App() {
   return (
-    <LoanProvider>
-      <Router>
-        <div className="App">
-          <Navigation />
-          <main className="main-content">
-            <Routes>
-              <Route path="/" element={<LoanList />} />
-              <Route path="/add-loan" element={<AddLoan />} />
-            </Routes>
-          </main>
-          <Footer />
-        </div>
-      </Router>
-    </LoanProvider>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+        <Navigation />
+        <Box component="main" sx={{ flexGrow: 1, py: 3 }}>
+          <Routes>
+            <Route path="/" element={<LoanList />} />
+            <Route path="/add-loan" element={<AddLoan />} />
+          </Routes>
+        </Box>
+        <Footer />
+      </Box>
+    </ThemeProvider>
   );
 }
 

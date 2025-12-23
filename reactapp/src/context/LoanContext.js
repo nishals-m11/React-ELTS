@@ -14,20 +14,11 @@ export const LoanProvider = ({ children }) => {
   const [loans, setLoans] = useState([]);
 
   const addLoan = (loan) => {
-    const newLoan = {
-      id: Date.now(),
-      ...loan
-    };
-    setLoans(prev => [...prev, newLoan]);
-  };
-
-  const value = {
-    loans,
-    addLoan
+    setLoans(prev => [...prev, { ...loan, id: Date.now() }]);
   };
 
   return (
-    <LoanContext.Provider value={value}>
+    <LoanContext.Provider value={{ loans, addLoan }}>
       {children}
     </LoanContext.Provider>
   );
