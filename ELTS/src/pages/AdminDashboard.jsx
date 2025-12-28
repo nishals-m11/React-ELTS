@@ -1,15 +1,17 @@
+import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { FaChartBar, FaUsers, FaMoneyBillWave, FaClock, FaCheckCircle, FaExclamationTriangle, FaUserShield } from 'react-icons/fa';
 
 function AdminDashboard() {
-  const { role } = useAuth();
+  const { isLoggedIn, role, applications, updateApplicationStatus } = useAuth();
+  const [selectedPeriod, setSelectedPeriod] = useState('6months');
 
-  if (role !== "admin") {
+  if (!isLoggedIn || role !== "admin") {
     return (
       <div style={styles.container}>
         <div style={styles.card}>
           <h2>Access Denied</h2>
-          <p>Admin access required to view this page.</p>
+          <p>Please login as admin to view this page.</p>
         </div>
       </div>
     );
@@ -46,13 +48,19 @@ function AdminDashboard() {
   ];
 
   // Mock data for charts
+  const monthlyApplications = applications.reduce((acc, app) => {
+    const month = new Date(app.id).toLocaleString('default', { month: 'short' });
+    acc[month] = (acc[month] || 0) + 1;
+    return acc;
+  }, {});
+
   const loanData = [
-    { month: 'Jan', amount: 45 },
-    { month: 'Feb', amount: 52 },
-    { month: 'Mar', amount: 48 },
-    { month: 'Apr', amount: 61 },
-    { month: 'May', amount: 55 },
-    { month: 'Jun', amount: 67 },
+    { month: 'Jan', amount: monthlyApplications.Jan || 0 },
+    { month: 'Feb', amount: monthlyApplications.Feb || 0 },
+    { month: 'Mar', amount: monthlyApplications.Mar || 0 },
+    { month: 'Apr', amount: monthlyApplications.Apr || 0 },
+    { month: 'May', amount: monthlyApplications.May || 0 },
+    { month: 'Jun', amount: monthlyApplications.Jun || 0 },
   ];
 
   const riskData = [
@@ -69,6 +77,19 @@ function AdminDashboard() {
           Admin Dashboard
         </h1>
         <p style={styles.subtitle}>Comprehensive loan management and analytics</p>
+        <button style={styles.downloadBtn} onClick={() => {
+          const report = `Loan Applications Report\n\nTotal Applications: ${applications.length}\nApproved: ${applications.filter(app => app.status === 'Approved').length}\nPending: ${applications.filter(app => app.status === 'Pending').length}\nRejected: ${applications.filter(app => app.status === 'Rejected').length}\n\nDetails:\n${applications.map(app => `${app.studentName} - ${app.email} - ₹${app.loanAmount} - ${app.status}`).join('\n')}`;
+          const blob = new Blob([report], { type: 'text/plain' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'loan_report.txt';
+          a.click();
+          URL.revokeObjectURL(url);
+        }}>
+          <FaChartBar style={styles.btnIcon} />
+          Download Report
+        </button>
       </div>
 
       {/* Key Metrics */}
@@ -78,8 +99,8 @@ function AdminDashboard() {
             <FaUsers />
           </div>
           <div style={styles.metricContent}>
-            <h3>1,250</h3>
-            <p>Total Students</p>
+            <h3>{applications.length}</h3>
+            <p>Total Applications</p>
           </div>
         </div>
         <div style={styles.metricCard}>
@@ -87,8 +108,8 @@ function AdminDashboard() {
             <FaMoneyBillWave />
           </div>
           <div style={styles.metricContent}>
-            <h3>₹8.2Cr</h3>
-            <p>Total Loan Amount</p>
+            <h3>₹{applications.reduce((sum, app) => sum + parseInt(app.loanAmount || 0), 0).toLocaleString()}</h3>
+            <p>Total Requested Amount</p>
           </div>
         </div>
         <div style={styles.metricCard}>
@@ -96,8 +117,8 @@ function AdminDashboard() {
             <FaCheckCircle />
           </div>
           <div style={styles.metricContent}>
-            <h3>92%</h3>
-            <p>Repayment Rate</p>
+            <h3>{applications.filter(app => app.status === 'Approved').length}</h3>
+            <p>Approved Applications</p>
           </div>
         </div>
         <div style={styles.metricCard}>
@@ -105,7 +126,7 @@ function AdminDashboard() {
             <FaClock />
           </div>
           <div style={styles.metricContent}>
-            <h3>15</h3>
+            <h3>{applications.filter(app => app.status === 'Pending').length}</h3>
             <p>Pending Approvals</p>
           </div>
         </div>
@@ -113,8 +134,20 @@ function AdminDashboard() {
 
       {/* Charts Section */}
       <div style={styles.chartsGrid}>
+        <div style={styles.filterContainer}>
+          <label style={styles.filterLabel}>Filter by Period:</label>
+          <select
+            value={selectedPeriod}
+            onChange={(e) => setSelectedPeriod(e.target.value)}
+            style={styles.filterSelect}
+          >
+            <option value="3months">Last 3 Months</option>
+            <option value="6months">Last 6 Months</option>
+            <option value="1year">Last Year</option>
+          </select>
+        </div>
         <div style={styles.chartCard}>
-          <h3>Monthly Loan Disbursements</h3>
+          <h3>Monthly Loan Applications</h3>
           <div style={styles.chartContainer}>
             <div style={styles.barChart}>
               {loanData.map((item, index) => (
@@ -123,7 +156,7 @@ function AdminDashboard() {
                     <div
                       style={{
                         ...styles.barFill,
-                        height: `${(item.amount / 70) * 100}%`,
+                        height: `${(item.amount / 10) * 100}%`,
                       }}
                     ></div>
                   </div>
@@ -178,6 +211,70 @@ function AdminDashboard() {
             </div>
           </div>
         ))}
+      </div>
+
+      {/* Census Analysis */}
+      <div style={styles.card}>
+        <h3>Census Analysis</h3>
+        <div style={styles.censusGrid}>
+          <div style={styles.censusItem}>
+            <h4>Demographics</h4>
+            <ul style={styles.censusList}>
+              <li>Male Students: 65%</li>
+              <li>Female Students: 35%</li>
+              <li>Average Age: 22 years</li>
+            </ul>
+          </div>
+          <div style={styles.censusItem}>
+            <h4>Geographic Distribution</h4>
+            <ul style={styles.censusList}>
+              <li>Urban: 70%</li>
+              <li>Semi-Urban: 20%</li>
+              <li>Rural: 10%</li>
+            </ul>
+          </div>
+          <div style={styles.censusItem}>
+            <h4>Course Distribution</h4>
+            <ul style={styles.censusList}>
+              <li>Engineering: 40%</li>
+              <li>Medical: 25%</li>
+              <li>Arts & Science: 20%</li>
+              <li>Others: 15%</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      {/* Loan Applications */}
+      <div style={styles.card}>
+        <h3>Loan Applications</h3>
+        {applications.length === 0 ? (
+          <p>No applications yet.</p>
+        ) : (
+          <div style={styles.applicationsList}>
+            {applications.map(app => (
+              <div key={app.id} style={styles.applicationItem}>
+                <div style={styles.appDetails}>
+                  <h4>{app.studentName}</h4>
+                  <p>Email: {app.email} | Phone: {app.phone}</p>
+                  <p>Course: {app.course} | Institution: {app.institution}</p>
+                  <p>Loan Amount: ₹{app.loanAmount} | Duration: {app.duration} years</p>
+                  <p>Status: <span style={{ color: app.status === 'Approved' ? 'green' : app.status === 'Rejected' ? 'red' : 'orange' }}>{app.status}</span></p>
+                </div>
+                {app.status === 'Pending' && (
+                  <div style={styles.appActions}>
+                    <button style={styles.approveBtn} onClick={() => updateApplicationStatus(app.id, 'Approved')}>
+                      Approve
+                    </button>
+                    <button style={styles.rejectBtn} onClick={() => updateApplicationStatus(app.id, 'Rejected')}>
+                      Reject
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Recent Activities */}
@@ -237,6 +334,7 @@ const styles = {
   header: {
     textAlign: "center",
     marginBottom: "40px",
+    position: "relative",
   },
   title: {
     fontSize: "2.5rem",
@@ -288,6 +386,24 @@ const styles = {
     gridTemplateColumns: "repeat(auto-fit, minmax(400px, 1fr))",
     gap: "30px",
     marginBottom: "40px",
+  },
+  filterContainer: {
+    gridColumn: "1 / -1",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: "15px",
+    marginBottom: "20px",
+  },
+  filterLabel: {
+    fontSize: "1rem",
+    fontWeight: "500",
+  },
+  filterSelect: {
+    padding: "8px 12px",
+    border: "1px solid #ddd",
+    borderRadius: "4px",
+    fontSize: "1rem",
   },
   chartCard: {
     backgroundColor: "white",
@@ -426,6 +542,74 @@ const styles = {
   },
   activityContent: {
     flex: 1,
+  },
+  censusGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+    gap: "20px",
+  },
+  censusItem: {
+    backgroundColor: "#f8fafc",
+    padding: "20px",
+    borderRadius: "8px",
+    border: "1px solid #e2e8f0",
+  },
+  censusList: {
+    listStyle: "none",
+    padding: 0,
+    margin: 0,
+  },
+  applicationsList: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "15px",
+  },
+  applicationItem: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: "20px",
+    backgroundColor: "#f8fafc",
+    borderRadius: "8px",
+    border: "1px solid #e2e8f0",
+  },
+  appDetails: {
+    flex: 1,
+  },
+  appActions: {
+    display: "flex",
+    gap: "10px",
+  },
+  approveBtn: {
+    backgroundColor: "#26de81",
+    color: "white",
+    border: "none",
+    padding: "8px 16px",
+    borderRadius: "4px",
+    cursor: "pointer",
+  },
+  rejectBtn: {
+    backgroundColor: "#eb3b5a",
+    color: "white",
+    border: "none",
+    padding: "8px 16px",
+    borderRadius: "4px",
+    cursor: "pointer",
+  },
+  downloadBtn: {
+    backgroundColor: "#667eea",
+    color: "white",
+    border: "none",
+    padding: "10px 20px",
+    borderRadius: "6px",
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    fontSize: "16px",
+  },
+  btnIcon: {
+    fontSize: "1rem",
   },
 };
 

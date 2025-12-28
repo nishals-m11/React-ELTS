@@ -1,8 +1,19 @@
 /* eslint-disable react-refresh/only-export-components */
 import { useState } from "react";
 import { FaUser, FaBook, FaUniversity, FaMoneyBillWave, FaClock, FaFileAlt, FaPhone, FaEnvelope, FaMapMarkerAlt, FaCheckCircle } from 'react-icons/fa';
+import { useAuth } from "../context/AuthContext";
 
 function ApplyLoan() {
+  const { isLoggedIn, addApplication } = useAuth();
+
+  if (!isLoggedIn) {
+    return (
+      <div style={{ padding: '20px', textAlign: 'center' }}>
+        <h2>Access Denied</h2>
+        <p>Please login to apply for a loan.</p>
+      </div>
+    );
+  }
   const [formData, setFormData] = useState({
     studentName: "",
     email: "",
@@ -62,6 +73,7 @@ function ApplyLoan() {
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 2000));
 
+    addApplication(formData);
     setSubmitted(true);
     setIsSubmitting(false);
 

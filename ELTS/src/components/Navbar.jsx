@@ -1,9 +1,15 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { FaGraduationCap, FaUser, FaUserShield } from 'react-icons/fa';
+import { FaGraduationCap, FaSignInAlt, FaSignOutAlt } from 'react-icons/fa';
 
 function Navbar() {
-  const { role, switchToStudent, switchToAdmin } = useAuth();
+  const { isLoggedIn, role, user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
 
   return (
     <nav style={styles.nav}>
@@ -14,13 +20,13 @@ function Navbar() {
 
       <div style={styles.links}>
         <Link to="/" style={styles.link}>Home</Link>
-        <Link to="/apply-loan" style={styles.link}>Apply Loan</Link>
+        {isLoggedIn && role === "student" && <Link to="/apply-loan" style={styles.link}>Apply Loan</Link>}
 
-        {role === "student" && (
+        {isLoggedIn && role === "student" && (
           <Link to="/student-dashboard" style={styles.link}>Dashboard</Link>
         )}
 
-        {role === "admin" && (
+        {isLoggedIn && role === "admin" && (
           <Link to="/admin-dashboard" style={styles.link}>Admin Panel</Link>
         )}
 
@@ -28,24 +34,21 @@ function Navbar() {
         <Link to="/contact" style={styles.link}>Contact</Link>
       </div>
 
-      <div style={styles.roleSwitcher}>
-        <span style={styles.roleLabel}>Switch Role:</span>
-        <div style={styles.roleButtons}>
-          <button
-            onClick={switchToStudent}
-            style={role === "student" ? styles.activeBtn : styles.inactiveBtn}
-          >
-            <FaUser style={styles.btnIcon} />
-            Student
-          </button>
-          <button
-            onClick={switchToAdmin}
-            style={role === "admin" ? styles.activeBtn : styles.inactiveBtn}
-          >
-            <FaUserShield style={styles.btnIcon} />
-            Admin
-          </button>
-        </div>
+      <div style={styles.authSection}>
+        {isLoggedIn ? (
+          <div style={styles.userInfo}>
+            <span>Welcome, {user?.name}</span>
+            <button onClick={handleLogout} style={styles.logoutBtn}>
+              <FaSignOutAlt style={styles.btnIcon} />
+              Logout
+            </button>
+          </div>
+        ) : (
+          <Link to="/login" style={styles.loginLink}>
+            <FaSignInAlt style={styles.btnIcon} />
+            Login
+          </Link>
+        )}
       </div>
     </nav>
   );
@@ -132,6 +135,40 @@ const styles = {
   },
   btnIcon: {
     fontSize: "0.9rem",
+  },
+  authSection: {
+    display: "flex",
+    alignItems: "center",
+  },
+  userInfo: {
+    display: "flex",
+    alignItems: "center",
+    gap: "15px",
+  },
+  logoutBtn: {
+    backgroundColor: "transparent",
+    color: "white",
+    border: "2px solid rgba(255,255,255,0.3)",
+    borderRadius: "25px",
+    padding: "8px 16px",
+    cursor: "pointer",
+    fontWeight: "500",
+    display: "flex",
+    alignItems: "center",
+    gap: "6px",
+    transition: "all 0.3s ease",
+  },
+  loginLink: {
+    color: "white",
+    textDecoration: "none",
+    fontWeight: "500",
+    padding: "8px 16px",
+    borderRadius: "6px",
+    backgroundColor: "#9f7aea",
+    display: "flex",
+    alignItems: "center",
+    gap: "6px",
+    transition: "background-color 0.3s ease",
   },
 };
 

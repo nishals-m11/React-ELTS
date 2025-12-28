@@ -1,6 +1,9 @@
+import { Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import { FaRocket, FaChartLine, FaShieldAlt, FaUsers, FaBook, FaCalculator } from 'react-icons/fa';
 
 function Home() {
+  const { isLoggedIn, role } = useAuth();
   return (
     <div style={styles.container}>
       {/* Detached Welcome Box */}
@@ -36,8 +39,17 @@ function Home() {
           repayments, and outstanding balances in a transparent manner.
         </p>
         <div style={styles.heroButtons}>
-          <button style={styles.primaryBtn}>Get Started</button>
-          <button style={styles.secondaryBtn}>Learn More</button>
+          <Link to="/apply-loan" style={{ textDecoration: 'none' }}>
+            <button style={styles.primaryBtn}>Get Started</button>
+          </Link>
+          {isLoggedIn && role === "admin" && (
+            <Link to="/admin-dashboard" style={{ textDecoration: 'none' }}>
+              <button style={styles.secondaryBtn}>Admin Panel</button>
+            </Link>
+          )}
+          <Link to="/about" style={{ textDecoration: 'none' }}>
+            <button style={styles.secondaryBtn}>Learn More</button>
+          </Link>
         </div>
       </div>
 

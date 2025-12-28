@@ -9,13 +9,13 @@ import {
 import { FaChartPie, FaCalendarAlt, FaCreditCard, FaCheckCircle, FaExclamationTriangle } from 'react-icons/fa';
 
 function StudentDashboard() {
-  const { role } = useAuth();
+  const { isLoggedIn, role } = useAuth();
   const [state, dispatch] = useReducer(
     loanReducer,
     initialLoanState
   );
 
-  if (role !== "student") {
+  if (!isLoggedIn || role !== "student") {
     return (
       <div style={styles.container}>
         <div style={styles.card}>
