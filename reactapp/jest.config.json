@@ -1,0 +1,10 @@
+{
+  "testEnvironment": "jsdom",
+  "setupFilesAfterEnv": ["<rootDir>/src/setupTests.js"],
+  "moduleNameMapping": {
+    "^canvas$": "identity-obj-proxy"
+  },
+  "testEnvironmentOptions": {
+    "resources": "usable"
+  }
+}
