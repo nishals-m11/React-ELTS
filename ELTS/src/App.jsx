@@ -17,12 +17,12 @@ const Login = lazy(() => import("./pages/Login"));
 function App() {
   return (
     <Router>
-      <Suspense fallback={<div style={{ textAlign: 'center', padding: '50px' }}>Loading...</div>}>
+      <Suspense fallback={<div style={{ textAlign: 'center', padding: '80px', fontSize: '24px', fontWeight: 'bold', color: '#9f7aea' }}>Loading EduLoan...</div>}>
         <div style={styles.app}>
           <Navbar />
 
           <main style={styles.main}>
-            <Suspense fallback={<div style={{ textAlign: 'center', padding: '20px' }}>Loading page...</div>}>
+            <Suspense fallback={<div style={{ textAlign: 'center', padding: '60px', fontSize: '20px', fontWeight: 'bold', color: '#667eea' }}>Loading page...</div>}>
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/login" element={<Login />} />

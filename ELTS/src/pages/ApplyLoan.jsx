@@ -54,81 +54,79 @@ function ApplyLoan() {
 
     // Individual field validations
     if (!formData.studentName.trim()) {
-      alert("Please enter your full name.");
+      setError("Please enter your full name.");
       setIsSubmitting(false);
       return;
     }
 
     if (!formData.email.trim()) {
-      alert("Please enter your email address.");
+      setError("Please enter your email address.");
       setIsSubmitting(false);
       return;
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) {
-      alert("Please enter a valid email address.");
+      setError("Please enter a valid email address.");
       setIsSubmitting(false);
       return;
     }
 
     if (!formData.phone.trim()) {
-      alert("Please enter your phone number.");
+      setError("Please enter your phone number.");
       setIsSubmitting(false);
       return;
     }
 
-    const phoneRegex = /^\d{10}$/;
     if (!phoneRegex.test(formData.phone)) {
-      alert("Please enter a valid 10-digit phone number.");
+      setError("Please enter a valid 10-digit phone number.");
       setIsSubmitting(false);
       return;
     }
 
     if (!formData.address.trim()) {
-      alert("Please enter your address.");
+      setError("Please enter your address.");
       setIsSubmitting(false);
       return;
     }
 
     if (!formData.course.trim()) {
-      alert("Please enter your course name.");
+      setError("Please enter your course name.");
       setIsSubmitting(false);
       return;
     }
 
     if (!formData.institution.trim()) {
-      alert("Please enter your institution name.");
+      setError("Please enter your institution name.");
       setIsSubmitting(false);
       return;
     }
 
     if (!formData.loanAmount || isNaN(formData.loanAmount) || parseFloat(formData.loanAmount) <= 0) {
-      alert("Please enter a valid loan amount greater than 0.");
+      setError("Please enter a valid loan amount greater than 0.");
       setIsSubmitting(false);
       return;
     }
 
     if (!formData.duration || isNaN(formData.duration) || parseInt(formData.duration) <= 0) {
-      alert("Please enter a valid loan duration in years.");
+      setError("Please enter a valid loan duration in years.");
       setIsSubmitting(false);
       return;
     }
 
     if (formData.fatherName && formData.fatherName.trim().length < 2) {
-      alert("Please enter a valid father's name (at least 2 characters).");
+      setError("Please enter a valid father's name (at least 2 characters).");
       setIsSubmitting(false);
       return;
     }
 
     if (formData.motherName && formData.motherName.trim().length < 2) {
-      alert("Please enter a valid mother's name (at least 2 characters).");
+      setError("Please enter a valid mother's name (at least 2 characters).");
       setIsSubmitting(false);
       return;
     }
 
     if (formData.annualIncome && (isNaN(formData.annualIncome) || parseFloat(formData.annualIncome) < 0)) {
-      alert("Please enter a valid annual income.");
+      setError("Please enter a valid annual income.");
       setIsSubmitting(false);
       return;
     }
@@ -136,7 +134,7 @@ function ApplyLoan() {
     // If all validations pass
     setError("");
     // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise(resolve => setTimeout(resolve, 3000));
 
     addApplication(formData);
     setSubmitted(true);
@@ -176,17 +174,17 @@ function ApplyLoan() {
         <p style={styles.subtitle}>Fill out the form below to apply for your education loan</p>
       </div>
 
+      {submitted && (
+        <div style={styles.alertSuccess}>
+          <FaCheckCircle style={styles.alertIcon} />
+          Application submitted successfully! You will receive a confirmation email shortly.
+        </div>
+      )}
+
       {error && (
         <div style={styles.alertError}>
           <FaExclamationTriangle style={styles.alertIcon} />
           {error}
-        </div>
-      )}
-
-      {submitted && (
-        <div style={styles.alertSuccess}>
-          <FaCheckCircle style={styles.alertIcon} />
-          Loan application submitted successfully! We'll review your application and get back to you within 3-5 business days.
         </div>
       )}
 
